@@ -11,12 +11,12 @@ type CheckboxInputs = {
 };
 
 type Inputs = StandardInputs & CheckboxInputs;
+type Filters = [string, string | string[]][];
 
-type Elo = [string, string | string[]][];
 const Filter: FC = () => {
   const { handleSubmit, register } = useForm<Inputs>();
   const [search, setSearch] = useSearchParams();
-  const [filter, setFilter] = useState<Elo | null>(null);
+  const [filter, setFilter] = useState<Filters | null>(null);
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     const filteredTrueValues = Object.entries(data).filter(([_, value]) => {
@@ -114,8 +114,8 @@ const Filter: FC = () => {
           />
         </div>
         <button>Apply filters</button>
-        {filter && <FilterResults filter={filter} />}
       </form>
+      {filter && <FilterResults filter={filter} />}
     </div>
   );
 };
