@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { inputsData } from '../../data/data';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
@@ -9,14 +9,26 @@ type StandardInputs = Record<string, string>;
 type CheckboxInputs = {
   checkbox: string[];
 };
-
 type Inputs = StandardInputs & CheckboxInputs;
-type Filters = [string, string | string[]][];
+
+type SearchParamsObj = Record<string, string[]>;
 
 const Filter: FC = () => {
+  const convertSearchParamsToObject = (data: URLSearchParams) => {
+    const obj: SearchParamsObj = {};
+    for (const [key, value] of data.entries()) {
+      if (!obj[key]) {
+        obj[key] = [value];
+      } else {
+        obj[key].push(value);
+      }
+    }
+    return obj;
+  };
+
   const { handleSubmit, register } = useForm<Inputs>();
   const [search, setSearch] = useSearchParams();
-  const [filter, setFilter] = useState<Filters | null>(null);
+  const [filter, setFilter] = useState<SearchParamsObj>(convertSearchParamsToObject(search));
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     const filteredTrueValues = Object.entries(data).filter(([_, value]) => {
@@ -24,8 +36,11 @@ const Filter: FC = () => {
     });
     const convertToObject = Object.fromEntries(filteredTrueValues);
     setSearch(convertToObject);
-    setFilter(filteredTrueValues);
   };
+
+  useEffect(() => {
+    setFilter(convertSearchParamsToObject(search));
+  }, [search]);
 
   return (
     <div>
@@ -43,6 +58,7 @@ const Filter: FC = () => {
                       id={variant}
                       {...register(encodeURI(input.name))}
                       value={encodeURI(variant)}
+                      defaultChecked={search.getAll(input.name).includes(variant)}
                     />
                   </div>
                 );
@@ -57,6 +73,7 @@ const Filter: FC = () => {
             type='number'
             id='min'
             {...register('min')}
+            defaultValue={search.get('min') || ''}
           />
         </div>
         <div>
@@ -65,6 +82,7 @@ const Filter: FC = () => {
             type='number'
             id='max'
             {...register('max')}
+            defaultValue={search.get('max') || ''}
           />
         </div>
         <h2>Stars</h2>
@@ -75,6 +93,7 @@ const Filter: FC = () => {
             id='1'
             value='1'
             {...register('radio')}
+            defaultChecked={search.get('radio') === '1'}
           />
         </div>
         <div>
@@ -84,6 +103,7 @@ const Filter: FC = () => {
             id='2'
             value='2'
             {...register('radio')}
+            defaultChecked={search.get('radio') === '2'}
           />
         </div>
         <div>
@@ -93,6 +113,7 @@ const Filter: FC = () => {
             id='3'
             value='3'
             {...register('radio')}
+            defaultChecked={search.get('radio') === '3'}
           />
         </div>
         <div>
@@ -102,6 +123,7 @@ const Filter: FC = () => {
             id='4'
             value='4'
             {...register('radio')}
+            defaultChecked={search.get('radio') === '4'}
           />
         </div>
         <div>
@@ -111,11 +133,12 @@ const Filter: FC = () => {
             id='5'
             value='5'
             {...register('radio')}
+            defaultChecked={search.get('radio') === '5'}
           />
         </div>
         <button>Apply filters</button>
       </form>
-      {filter && <FilterResults filter={filter} />}
+      {Object.keys(filter).length > 0 && <FilterResults filter={filter} />}
     </div>
   );
 };

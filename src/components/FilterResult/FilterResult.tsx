@@ -1,33 +1,29 @@
 import type { FC } from 'react';
 
+type SearchParamsObj = Record<string, string[]>;
+
 type Props = {
-  filter: [string, string | string[]][];
+  filter: SearchParamsObj;
 };
 
 const FilterResult: FC<Props> = ({ filter }) => {
-  const toArray = filter.map(([key, value]) => {
-    let test: string;
-    if (Array.isArray(value)) {
-      test = value.join(', ');
-    } else {
-      test = value;
-    }
-    return [key, test];
-  });
+  const toArray = () => {
+    return Object.entries(filter).map(([key, values]) => {
+      return [key, values.join(', ')];
+    });
+  };
   return (
-    <>
-      <h3>Applied filters:</h3>
-      <div>
-        {toArray.map(([key, value]) => {
-          return (
-            <div>
-              <span>Category: {key} </span>
-              <span>Filters: {value} </span>
-            </div>
-          );
-        })}
-      </div>
-    </>
+    <div>
+      <h2>Applied filters</h2>
+      {toArray().map((item, i) => {
+        return (
+          <div key={i}>
+            <span>CATEGORY:{item[0]} </span>
+            <span>FILTERS:{item[1]} </span>
+          </div>
+        );
+      })}
+    </div>
   );
 };
 
